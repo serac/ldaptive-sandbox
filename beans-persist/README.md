@@ -54,3 +54,10 @@ DefaultLdapEntryMapper mapper = new DefaultLdapEntryMapper();
 MyObject object = new MyObject();
 mapper.map(entry, object); // object now has it's properties set
 ```
+
+## Object Mapping APIs
+* J2EE Entity Manager: http://docs.oracle.com/javaee/6/api/javax/persistence/EntityManager.html
+* Dover: http://dozer.sourceforge.net/documentation/gettingstarted.html
+* Morph: http://morph.sourceforge.net/reference/html/transformers.html#transformers-converters
+* ModelMapper: http://modelmapper.org/getting-started/
+* EZMorph: http://ezmorph.sourceforge.net/howto.html
