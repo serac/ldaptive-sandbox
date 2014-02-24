@@ -48,3 +48,9 @@ public class MyObject {
   public vlid setAffiliations(Set<String> s) {affils = s;}
 }
 ```
+```java
+LdapEntry entry = ... // retrieve entry from ldap
+DefaultLdapEntryMapper mapper = new DefaultLdapEntryMapper();
+MyObject object = new MyObject();
+mapper.map(entry, object); // object now has it's properties set
+```
