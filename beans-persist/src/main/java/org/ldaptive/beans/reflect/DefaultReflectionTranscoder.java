@@ -18,6 +18,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.ldaptive.io.BooleanValueTranscoder;
@@ -50,6 +51,10 @@ public class DefaultReflectionTranscoder implements ReflectionTranscoder
   /** Transcoder for this type. */
   private final ReflectionTranscoder valueTranscoder;
 
+  /** Set of transcoders support single values. */
+  private final Set<SingleValueReflectionTranscoder<?>> singleValueTranscoders =
+    new LinkedHashSet<SingleValueReflectionTranscoder<?>>();
+
 
   /**
    * Creates a new default reflection transcoder.
@@ -58,6 +63,40 @@ public class DefaultReflectionTranscoder implements ReflectionTranscoder
    */
   public DefaultReflectionTranscoder(final Type type)
   {
+    // Order matters due to implicit type conversion
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<String>(
+      new StringValueTranscoder()));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Boolean>(
+      new BooleanValueTranscoder(true)));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Boolean>(
+      new BooleanValueTranscoder()));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Short>(
+      new ShortValueTranscoder(true)));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Short>(
+      new ShortValueTranscoder()));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Integer>(
+      new IntegerValueTranscoder(true)));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Integer>(
+      new IntegerValueTranscoder()));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Long>(
+      new LongValueTranscoder(true)));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Long>(
+      new LongValueTranscoder()));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Float>(
+      new FloatValueTranscoder(true)));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Float>(
+      new FloatValueTranscoder()));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Double>(
+      new DoubleValueTranscoder(true)));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Double>(
+      new DoubleValueTranscoder()));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<byte[]>(
+      new ByteArrayValueTranscoder()));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<char[]>(
+      new CharArrayValueTranscoder()));
+    singleValueTranscoders.add(new SingleValueReflectionTranscoder<Object>(
+      new ObjectValueTranscoder()));
+
     if (type instanceof Class) {
       final Class<?> c = (Class<?>) type;
       if (c.isArray()) {
@@ -113,59 +152,12 @@ public class DefaultReflectionTranscoder implements ReflectionTranscoder
   protected SingleValueReflectionTranscoder getSingleValueReflectionTranscoder(
     final Class<?> type)
   {
-    SingleValueReflectionTranscoder transcoder;
-    if (Object.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Object>(
-        new ObjectValueTranscoder());
-    } else if (Boolean.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Boolean>(
-        new BooleanValueTranscoder());
-    } else if (boolean.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Boolean>(
-        new BooleanValueTranscoder(true));
-    } else if (Double.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Double>(
-        new DoubleValueTranscoder());
-    } else if (double.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Double>(
-        new DoubleValueTranscoder(true));
-    } else if (Float.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Float>(
-        new FloatValueTranscoder());
-    } else if (float.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Float>(
-        new FloatValueTranscoder(true));
-    } else if (Integer.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Integer>(
-        new IntegerValueTranscoder());
-    } else if (int.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Integer>(
-        new IntegerValueTranscoder(true));
-    } else if (Long.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Long>(
-        new LongValueTranscoder());
-    } else if (long.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Long>(
-        new LongValueTranscoder(true));
-    } else if (Short.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Short>(
-        new ShortValueTranscoder());
-    } else if (short.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<Short>(
-        new ShortValueTranscoder(true));
-    } else if (String.class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<String>(
-        new StringValueTranscoder());
-    } else if (byte[].class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<byte[]>(
-        new ByteArrayValueTranscoder());
-    } else if (char[].class.equals(type)) {
-      transcoder = new SingleValueReflectionTranscoder<char[]>(
-        new CharArrayValueTranscoder());
-    } else {
-      throw new IllegalArgumentException("Unsupported type: " + type);
+    for (SingleValueReflectionTranscoder t : singleValueTranscoders) {
+      if (t.supports(type)) {
+        return t;
+      }
     }
-    return transcoder;
+    throw new IllegalArgumentException("Unsupported type: " + type);
   }
 
 

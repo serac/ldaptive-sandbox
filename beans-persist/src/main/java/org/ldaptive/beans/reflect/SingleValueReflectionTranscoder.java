@@ -105,6 +105,18 @@ public class SingleValueReflectionTranscoder<T> implements ReflectionTranscoder
   }
 
 
+  /**
+   * Determines whether this class can convert objects of the given class.
+   *
+   * @return  True if this instance supports objects of the given type, false
+   * otherwise.
+   */
+  public boolean supports(final Class<?> type)
+  {
+    return valueTranscoder.getType().isAssignableFrom(type);
+  }
+
+
   /** {@inheritDoc} */
   @Override
   public String toString()
